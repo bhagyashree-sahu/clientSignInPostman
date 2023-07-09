@@ -1,0 +1,317 @@
+{
+	"info": {
+		"_postman_id": "5595640e-bf58-43c2-ba45-93060c992789",
+		"name": "VAI-Assigment",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28028921"
+	},
+	"item": [
+		{
+			"name": "ValidateSucccesfulSignupOfMerchant",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function(){\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body matches string\", function() {\r",
+							"    pm.expect(pm.response.text()).to.include(\"message\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"We sent token to your Email\");   \r",
+							"});\r",
+							"\r",
+							"//To Validate the Json Key,Value pairs\r",
+							"pm.test(\"Verify data\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.type).to.eql(data['type']);\r",
+							"    pm.expect(jsonData.first_name).to.eql(data['first_name']);\r",
+							"    pm.expect(jsonData.last_name).to.eql(data['last_name']);\r",
+							"    pm.expect(jsonData.email).to.eql(data['email']);\r",
+							"    pm.expect(jsonData.companyname).to.eql(data['companyname']);\r",
+							"});\r",
+							"\r",
+							"//Validate Response Headers\r",
+							"pm.test(\"Content-Type is present\", function () {\r",
+							"    pm.response.to.have.header(\"Content-Type\");\r",
+							"});\r",
+							"\r",
+							"//Response type should be less than 200ms\r",
+							"pm.test(\"Response time is less than 200ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"//Schema Validation\r",
+							"var schema = {\r",
+							"  \"type\": \"object\",\r",
+							"  \"properties\": {\r",
+							"    \"status\": {\r",
+							"      \"type\": \"integer\"\r",
+							"    },\r",
+							"    \"message\": {\r",
+							"      \"type\": \"string\"\r",
+							"    },\r",
+							"    \"data\": {\r",
+							"      \"type\": \"object\",\r",
+							"      \"properties\": {\r",
+							"        \"type\": {\r",
+							"          \"type\": \"string\"\r",
+							"        },\r",
+							"        \"first_name\": {\r",
+							"          \"type\": \"string\"\r",
+							"        },\r",
+							"        \"last_name\": {\r",
+							"          \"type\": \"string\"\r",
+							"        },\r",
+							"        \"email\": {\r",
+							"          \"type\": \"string\"\r",
+							"        },\r",
+							"        \"companyname\": {\r",
+							"          \"type\": \"string\"\r",
+							"        }\r",
+							"      },\r",
+							"      \"required\": [\r",
+							"        \"type\",\r",
+							"        \"first_name\",\r",
+							"        \"last_name\",\r",
+							"        \"email\",\r",
+							"        \"companyname\"\r",
+							"      ]\r",
+							"    }\r",
+							"  },\r",
+							"  \"required\": [\r",
+							"    \"status\",\r",
+							"    \"message\",\r",
+							"    \"data\"\r",
+							"  ]\r",
+							"} \r",
+							"  \r",
+							"pm.test('Schema is valid', function () {\r",
+							"    pm.response.to.have.jsonSchema(schema)\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"//To generate random password \r",
+							"const Allowed = {\r",
+							"    Uppers: \"QWERTYUIOPASDFGHJKLZXCVBNM\",\r",
+							"    Lowers: \"qwertyuiopasdfghjklzxcvbnm\",\r",
+							"    Numbers: \"1234567890\",\r",
+							"    Symbols: \"!@#$%^&*\"\r",
+							"}\r",
+							"\r",
+							"const getRandomCharFromString = (str) => str.charAt(Math.floor(Math.random() * str.length))\r",
+							"const generatePassword = (length = 15) => { // password will be @Param-length, default to 15, and have at least one upper, one lower, one number and one symbol\r",
+							"    let pwd = \"\";\r",
+							"    pwd += getRandomCharFromString(Allowed.Uppers); //pwd will have at least one upper\r",
+							"    pwd += getRandomCharFromString(Allowed.Lowers); //pwd will have at least one lower\r",
+							"    pwd += getRandomCharFromString(Allowed.Numbers); //pwd will have at least one number\r",
+							"    pwd += getRandomCharFromString(Allowed.Symbols);//pwd will have at least one symbol\r",
+							"    for (let i = pwd.length; i < length; i++)\r",
+							"        pwd += getRandomCharFromString(Object.values(Allowed).join('')); //fill the rest of the pwd with random characters\r",
+							"    console.log(\"password \"+ pwd)\r",
+							"    return pwd\r",
+							"}\r",
+							"pm.collectionVariables.set(\"generatePassword\",generatePassword())\r",
+							"\r",
+							"//To generate email id once for collection\r",
+							"const uuid = Math.random().toString(36).substring(2, 15) +\r",
+							"        Math.random().toString(36).substring(2, 15);\r",
+							"const email = \"user_\" + uuid + \"@myDomain.com\";\r",
+							"pm.environment.set(\"currentEmail\", email);\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "email",
+							"value": "{{currentEmail}}",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "{{generatePassword}}",
+							"type": "text"
+						},
+						{
+							"key": "first_name",
+							"value": "{{$randomFirstName}}",
+							"type": "text"
+						},
+						{
+							"key": "last_name",
+							"value": "{{$randomLastName}}",
+							"type": "text"
+						},
+						{
+							"key": "type",
+							"value": "Individual",
+							"type": "text"
+						},
+						{
+							"key": "companyname",
+							"value": "VAI",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{BASEURL}}/signUpMerchant",
+					"host": [
+						"{{BASEURL}}"
+					],
+					"path": [
+						"signUpMerchant"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ValidateAlreadyUsedEmailIdForSignUp",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"//To generate random password\r",
+							"\r",
+							"const Allowed = {\r",
+							"    Uppers: \"QWERTYUIOPASDFGHJKLZXCVBNM\",\r",
+							"    Lowers: \"qwertyuiopasdfghjklzxcvbnm\",\r",
+							"    Numbers: \"1234567890\",\r",
+							"    Symbols: \"!@#$%^&*\"\r",
+							"}\r",
+							"\r",
+							"const getRandomCharFromString = (str) => str.charAt(Math.floor(Math.random() * str.length))\r",
+							"const generatePassword = (length = 15) => { // password will be @Param-length, default to 15, and have at least one upper, one lower, one number and one symbol\r",
+							"    let pwd = \"\";\r",
+							"    pwd += getRandomCharFromString(Allowed.Uppers); //pwd will have at least one upper\r",
+							"    pwd += getRandomCharFromString(Allowed.Lowers); //pwd will have at least one lower\r",
+							"    pwd += getRandomCharFromString(Allowed.Numbers); //pwd will have at least one number\r",
+							"    pwd += getRandomCharFromString(Allowed.Symbols);//pwd will have at least one symbolo\r",
+							"    for (let i = pwd.length; i < length; i++)\r",
+							"        pwd += getRandomCharFromString(Object.values(Allowed).join('')); //fill the rest of the pwd with random characters\r",
+							"    console.log(\"password \"+ pwd)\r",
+							"    return pwd\r",
+							"}\r",
+							"pm.collectionVariables.set(\"generatePassword\",generatePassword())\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function(){\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body matches string\", function() {\r",
+							"    pm.expect(pm.response.text()).to.include(\"message\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"Validation failed\"); \r",
+							"});\r",
+							"\r",
+							"//Assert\r",
+							"pm.test(\"Test if the Email Id is already Used or not\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"email\"); \r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "email",
+							"value": "{{currentEmail}}",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "{{generatePassword}}",
+							"type": "text"
+						},
+						{
+							"key": "first_name",
+							"value": "{{$randomFirstName}}",
+							"type": "text"
+						},
+						{
+							"key": "last_name",
+							"value": "{{$randomLastName}}",
+							"type": "text"
+						},
+						{
+							"key": "type",
+							"value": "Individual",
+							"type": "text"
+						},
+						{
+							"key": "companyname",
+							"value": "VAI",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{BASEURL}}/signUpMerchant",
+					"host": [
+						"{{BASEURL}}"
+					],
+					"path": [
+						"signUpMerchant"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "generatePassword",
+			"value": ""
+		},
+		{
+			"key": "emailId",
+			"value": ""
+		},
+		{
+			"key": "randomString",
+			"value": ""
+		}
+	]
+}
